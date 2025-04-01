@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  postgres:
+    # image: ghcr.io/cloudnative-pg/postgresql:17
+    build:
+      context: .
+      no_cache: true
+    container_name: guardia_pg_17
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    user: "26:26"  # Especifica o usuário postgres explicitamente
+    networks:
+      - guardia-network
+
+volumes:
+  pgdata:
+    name: guardia_pgdata
+
+networks:
+  guardia-network:
+    driver: bridge
