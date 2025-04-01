@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: guardia-lke-postgres
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: guardia-lke-pg-su
+  namespace: guardia-lke-postgres
+type: kubernetes.io/basic-auth
+stringData:
+  username: postgres
+  password: postgres
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: guardia-lke-pg-cluster
+  namespace: guardia-lke-postgres
+spec:
+  instances: 3
+  imageName: guardiafinance/guardia-pg:17
+  superuserSecret:
+    name: guardia-lke-pg-su
+  storage:
+    storageClass: standard
+    size: 4Gi
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  postgresql:
+    parameters:
+      pgaudit.log: 'write,function,role,ddl'
+      pgaudit.log_catalog: 'on'
+      pgaudit.log_parameter: 'on'
+      pgaudit.log_relation: 'on'
+  bootstrap:
+    initdb:
+      database: lke
+      owner: postgres
