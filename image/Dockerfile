@@ -1,4 +1,5 @@
-FROM ghcr.io/cloudnative-pg/postgresql:17
+FROM ghcr.io/cloudnative-pg/postgresql:17.4
+
 
 LABEL name="Guardia PostgreSQL" \
       vendor="Guardia" \
@@ -44,5 +45,4 @@ RUN echo "CREATE EXTENSION IF NOT EXISTS btree_gist;" > /docker-entrypoint-initd
     && echo "CREATE EXTENSION IF NOT EXISTS pgaudit;" >> /docker-entrypoint-initdb.d/init_extensions.sql \
     && echo "CREATE EXTENSION IF NOT EXISTS timescaledb;" >> /docker-entrypoint-initdb.d/init_extensions.sql
 
-RUN usermod -u 26 postgres
 USER 26

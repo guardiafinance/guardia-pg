@@ -9,9 +9,19 @@ metadata:
   name: guardia-lke-pg-su
   namespace: guardia-lke-postgres
 type: kubernetes.io/basic-auth
-stringData:
-  username: postgres
-  password: postgres
+data:
+  username: bGtl
+  password: <password>
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: guardia-lke-pg-app
+  namespace: guardia-lke-postgres
+type: kubernetes.io/basic-auth
+data:
+  username: YXBw
+  password: <password>
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
@@ -19,13 +29,44 @@ metadata:
   name: guardia-lke-pg-cluster
   namespace: guardia-lke-postgres
 spec:
-  instances: 3
+  description: "Cluster for Guardia LKE"
   imageName: guardiafinance/guardia-pg:17
-  superuserSecret:
-    name: guardia-lke-pg-su
+  instances: 3
+  startDelay: 300
+  stopDelay: 300
+  primaryUpdateStrategy: unsupervised
+
   storage:
     storageClass: standard
     size: 4Gi
+  
+  postgresql:
+    parameters:
+      shared_buffers: 256MB
+      pg_stat_statements.max: '10000'
+      pg_stat_statements.track: all
+      auto_explain.log_min_duration: '10s'
+      pgaudit.log: 'write,function,role,ddl'
+      pgaudit.log_catalog: 'on'
+      pgaudit.log_parameter: 'on'
+      pgaudit.log_relation: 'on'
+  
+  bootstrap:
+    initdb:
+      database: lke
+      owner: lke
+      secret:
+        name: guardia-lke-pg-app
+      postInitSQL:
+        - CREATE EXTENSION IF NOT EXISTS btree_gist;
+        - CREATE EXTENSION IF NOT EXISTS pgcrypto;
+        - CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+        - CREATE EXTENSION IF NOT EXISTS periods;
+  
+  enableSuperuserAccess: true
+  superuserSecret:
+    name: guardia-lke-pg-su
+
   resources:
     requests:
       cpu: 200m
@@ -33,13 +74,3 @@ spec:
     limits:
       cpu: 500m
       memory: 1Gi
-  postgresql:
-    parameters:
-      pgaudit.log: 'write,function,role,ddl'
-      pgaudit.log_catalog: 'on'
-      pgaudit.log_parameter: 'on'
-      pgaudit.log_relation: 'on'
-  bootstrap:
-    initdb:
-      database: lke
-      owner: postgres
