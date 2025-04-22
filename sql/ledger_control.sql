@@ -1,7 +1,7 @@
 CREATE SCHEMA IF NOT EXISTS guardia;
 
 -- Tabela para controle dos ledgers
-CREATE TABLE IF NOT EXISTS guardia.ledger_control (
+CREATE TABLE IF NOT EXISTS guardia.ledger (
     entity_id bigint NOT NULL PRIMARY KEY,
     external_entity_id VARCHAR(36) NOT NULL UNIQUE,
     entity_type VARCHAR(6) DEFAULT 'LEDGER',
@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS guardia.ledger_control (
 );
 
 -- Adicionar suporte temporal
-SELECT periods.add_system_time_period('guardia.ledger_control', 'valid_from', 'valid_to');
-SELECT periods.add_system_versioning('guardia.ledger_control');
+SELECT periods.add_system_time_period('guardia.ledger', 'valid_from', 'valid_to');
+SELECT periods.add_system_versioning('guardia.ledger');
 
 -- Função para criar novo ledger
 CREATE OR REPLACE PROCEDURE guardia.create_ledger(
@@ -57,7 +57,7 @@ BEGIN
     EXECUTE format('CREATE SCHEMA %I', v_schema_name);
 
     -- Registrar no controle
-    INSERT INTO guardia.ledger_control (
+    INSERT INTO guardia.ledger (
         entity_id,
         external_entity_id,
         ledger_name,
@@ -75,6 +75,20 @@ BEGIN
         v_schema_name
     );
 
+    -- TODO: Criar tabelas do ledger
+        -- Chapters
+            -- Chapter_history
+        -- Assets
+            -- Asset_history
+        -- Books
+            -- Book_history
+        -- Entries
+            -- Entry_history
+        -- Transactions
+            -- Transaction_history
+        -- Positions
+            -- Position_history
+            
 EXCEPTION WHEN OTHERS THEN
     -- Rollback em caso de erro
     IF v_tablespace_name IS NOT NULL THEN
