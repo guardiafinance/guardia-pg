@@ -1,4 +1,4 @@
-# Guia de Instalação e Configuração do Cluster PostgreSQL no Kubernetes
+# Guia de Instalação e Configuração do Cluster PostgreSQL no Kubernetes para projetos Guardia
 
 ## Pré-requisitos
 
